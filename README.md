@@ -11,29 +11,29 @@ still there when you come back.
 
 ## Features
 
--  **Account system**
+- 🔐 **Account system**
   - Email + password authentication
   - Passwords hashed with `bcrypt`
   - JWT-based sessions
 
--  **Interactive map**
+- 🗺️ **Interactive map**
   - Leaflet-powered map with OpenStreetMap tiles
   - Draggable markers with labels and date metadata
   - Focus a marker from the right-hand panel
 
--  **Marker relationships**
+- 🧵 **Marker relationships**
   - “Link markers” mode to visually connect two markers with a polyline
   - Useful for routes, dependencies or point-to-point operations
 
--  **Persistent storage**
+- 💾 **Persistent storage**
   - All markers are stored per-user in a SQLite database
   - No browser-only localStorage – true multi-device persistence
 
--  **Export / Import**
+- 📤 **Export / Import**
   - Export your markers as a JSON file
   - Re-import them into another account or environment
 
--  **Enterprise-style UI**
+- 💼 **Enterprise-style UI**
   - Dark, focused workspace layout
   - Clear separation between login experience and map workspace
   - Responsive design that works on laptops and tablets
