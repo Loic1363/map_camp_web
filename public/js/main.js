@@ -1,8 +1,8 @@
-// ================== AUTH / REDIRECTION ==================
+﻿// ================== AUTH / REDIRECTION ==================
 const STORAGE_TOKEN_KEY = 'authToken';
 let token = localStorage.getItem(STORAGE_TOKEN_KEY);
 
-// Si pas connecté → retour à la page de login
+// Si pas connect├® ÔåÆ retour ├á la page de login
 if (!token) {
     window.location.href = '/login.html';
 }
@@ -10,7 +10,7 @@ if (!token) {
 // ================== VARIABLES GLOBALES ==================
 let map = L.map('map').setView([46.6, 2.5], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
+    attribution: '┬® OpenStreetMap contributors'
 }).addTo(map);
 
 let markers = new Map(); // id -> marker
@@ -28,7 +28,7 @@ let selectedMarkersToLink = [];
 
 // ================== INITIALISATION ==================
 window.addEventListener('DOMContentLoaded', () => {
-    // bouton déconnexion
+    // bouton d├®connexion
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
@@ -144,7 +144,7 @@ async function createMarkerOnServer(data) {
 function createMarkerLocal(data) {
     const name = data.name || ('Repère ' + data.id);
 
-    const marker = L.marker([data.lat, data.lng], { draggable: true }).addTo(map);
+    const marker = L.marker([data.lat, data.lng], { draggable: false }).addTo(map);
 
     marker.data = {
         id: data.id,
@@ -163,19 +163,6 @@ function createMarkerLocal(data) {
     });
 
     marker.bindPopup(createPopupForm(marker.data));
-
-    marker.on('dragend', async function () {
-        const pos = this.getLatLng();
-        this.data.lat = pos.lat;
-        this.data.lng = pos.lng;
-        try {
-            await apiSend('/api/markers/' + this.data.id, 'PUT', this.data);
-            updateMarkerList();
-        } catch (e) {
-            console.error(e);
-            alert('Erreur de mise à jour');
-        }
-    });
 
     marker.on('click', function (event) {
         if (linkMarkersMode) {
@@ -218,7 +205,7 @@ window.saveMarker = async function (id) {
         updateMarkerList();
     } catch (e) {
         console.error(e);
-        alert('Erreur de mise à jour');
+        alert('Erreur de mise ├á jour');
     }
 };
 
@@ -247,14 +234,14 @@ function updateMarkerList() {
     });
 }
 
-// ================== LIENS ENTRE REPÈRES ==================
+// ================== LIENS ENTRE REPERES ==================
 function selectMarkerForLink(marker) {
     if (selectedMarkersToLink.includes(marker)) {
         selectedMarkersToLink = selectedMarkersToLink.filter(m => m !== marker);
         marker.setIcon(new L.Icon.Default());
     } else {
         if (selectedMarkersToLink.length >= 2) {
-            alert("Vous ne pouvez relier que 2 repères à la fois. Désélectionnez un repère.");
+            alert("Vous ne pouvez relier que 2 repères á la fois. Sélectionnez un repères.");
             return;
         }
         selectedMarkersToLink.push(marker);
