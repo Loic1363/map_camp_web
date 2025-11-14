@@ -7,6 +7,66 @@ if (!token) {
     window.location.href = '/login.html';
 }
 
+const LANGUAGE_STORAGE_KEY = 'appLanguage';
+const TRANSLATIONS = {
+    fr: {
+        addMarkerLabel: 'Ajouter un repère',
+        linkMarkersLabel: 'Relier des repères',
+        statusOn: 'ACTIF',
+        statusOff: 'INACTIF',
+        searchPlaceholder: 'Rechercher une ville, une adresse ou un lieu...',
+        searchButton: 'Aller',
+        sidebarTitle: 'Repères',
+        sidebarSubtitle: 'Cliquez sur un repère pour le centrer sur la carte.',
+        sidebarTip: 'Astuce : cliquez sur un repère pour modifier ses informations.',
+        productSubtitle: 'Espace de travail cartographique',
+        exportMarkersButton: 'Exporter les repères (JSON)',
+        importMarkersButton: 'Importer des repères',
+        logout: 'Se déconnecter',
+        defaultMarkerName: 'Repère',
+        exportFileName: 'reperes.json'
+    },
+    en: {
+        addMarkerLabel: 'Add marker',
+        linkMarkersLabel: 'Link markers',
+        statusOn: 'ON',
+        statusOff: 'OFF',
+        searchPlaceholder: 'Search a city, address or point of interest...',
+        searchButton: 'Search',
+        sidebarTitle: 'Markers',
+        sidebarSubtitle: 'Click a marker name to focus it on the map.',
+        sidebarTip: 'Tip: click a marker to edit its details.',
+        productSubtitle: 'Operations map workspace',
+        exportMarkersButton: 'Export markers (JSON)',
+        importMarkersButton: 'Import markers',
+        logout: 'Logout',
+        defaultMarkerName: 'Marker',
+        exportFileName: 'markers.json'
+    },
+    nl: {
+        addMarkerLabel: 'Marker toevoegen',
+        linkMarkersLabel: 'Markers verbinden',
+        statusOn: 'AAN',
+        statusOff: 'UIT',
+        searchPlaceholder: 'Zoek een stad, adres of interessant punt...',
+        searchButton: 'Zoeken',
+        sidebarTitle: 'Markers',
+        sidebarSubtitle: 'Klik op een marker om deze op de kaart te centreren.',
+        sidebarTip: 'Tip: klik op een marker om de details te wijzigen.',
+        productSubtitle: 'Kaartwerkruimte',
+        exportMarkersButton: 'Markers exporteren (JSON)',
+        importMarkersButton: 'Markers importeren',
+        logout: 'Afmelden',
+        defaultMarkerName: 'Marker',
+        exportFileName: 'markeringen.json'
+    }
+};
+
+let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'fr';
+if (!TRANSLATIONS[currentLanguage]) {
+    currentLanguage = 'fr';
+}
+
 // ================== VARIABLES GLOBALES ==================
 let map = L.map('map').setView([46.6, 2.5], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -38,6 +98,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     attachUIEvents();
+    initializeLanguage();
     loadMarkers();
 });
 
@@ -54,6 +115,67 @@ function attachUIEvents() {
     map.on('click', onMapClick);
 }
 
+function initializeLanguage() {
+    const select = document.getElementById('languageSelect');
+    if (select) {
+        select.value = currentLanguage;
+        select.addEventListener('change', (event) => {
+            const value = event.target.value;
+            if (!TRANSLATIONS[value]) return;
+            currentLanguage = value;
+            localStorage.setItem(LANGUAGE_STORAGE_KEY, value);
+            applyTranslations();
+        });
+    }
+    applyTranslations();
+}
+
+function applyTranslations() {
+    const t = TRANSLATIONS[currentLanguage];
+    if (!t) return;
+
+    const subtitle = document.querySelector('.product-subtitle');
+    if (subtitle) subtitle.textContent = t.productSubtitle;
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+    const searchButton = document.getElementById('btnSearch');
+    if (searchButton) searchButton.textContent = t.searchButton;
+
+    const sidebarTitle = document.querySelector('.sidebar-header h2');
+    if (sidebarTitle) sidebarTitle.textContent = t.sidebarTitle;
+
+    const sidebarSubtitle = document.querySelector('.sidebar-subtitle');
+    if (sidebarSubtitle) sidebarSubtitle.textContent = t.sidebarSubtitle;
+
+    const sidebarTip = document.querySelector('.sidebar-tip');
+    if (sidebarTip) sidebarTip.textContent = t.sidebarTip;
+
+    const exportBtn = document.getElementById('btnExportMarkers');
+    if (exportBtn) exportBtn.textContent = t.exportMarkersButton;
+
+    const importBtn = document.getElementById('btnImportMarkers');
+    if (importBtn) importBtn.textContent = t.importMarkersButton;
+
+    const logoutBtn = document.getElementById('btnLogout');
+    if (logoutBtn) logoutBtn.textContent = t.logout;
+
+    updateModeButtons();
+}
+
+function updateModeButtons() {
+    const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.fr;
+    const addBtn = document.getElementById('btnAddMarker');
+    if (addBtn) {
+        addBtn.textContent = `${t.addMarkerLabel}: ${addMarkerMode ? t.statusOn : t.statusOff}`;
+    }
+    const linkBtn = document.getElementById('btnLinkMarkers');
+    if (linkBtn) {
+        linkBtn.textContent = `${t.linkMarkersLabel}: ${linkMarkersMode ? t.statusOn : t.statusOff}`;
+    }
+}
+
 // ================== MODES ET UI ==================
 function toggleSidebar() {
     sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
@@ -61,14 +183,12 @@ function toggleSidebar() {
 
 function toggleAddMarker() {
     addMarkerMode = !addMarkerMode;
-    document.getElementById('btnAddMarker').textContent =
-        "Ajouter un repère: " + (addMarkerMode ? "ON" : "OFF");
+    updateModeButtons();
 }
 
 function toggleLinkMarkers() {
     linkMarkersMode = !linkMarkersMode;
-    document.getElementById('btnLinkMarkers').textContent =
-        "Relier des repères: " + (linkMarkersMode ? "ON" : "OFF");
+    updateModeButtons();
 }
 
 function toggleExportMenu() {
@@ -142,7 +262,8 @@ async function createMarkerOnServer(data) {
 }
 
 function createMarkerLocal(data) {
-    const name = data.name || ('Repère ' + data.id);
+    const languageData = TRANSLATIONS[currentLanguage] || TRANSLATIONS.fr;
+    const name = data.name || (`${languageData.defaultMarkerName} ${data.id}`);
 
     const marker = L.marker([data.lat, data.lng], { draggable: false }).addTo(map);
 
@@ -268,7 +389,8 @@ function exportMarkers() {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'reperes.json';
+    const translation = TRANSLATIONS[currentLanguage] || TRANSLATIONS.fr;
+    link.download = translation.exportFileName;
     link.click();
 }
 

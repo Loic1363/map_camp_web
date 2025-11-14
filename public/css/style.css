@@ -471,6 +471,17 @@ button {
     gap: 0.55rem;
 }
 
+.language-select {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-pill);
+    color: var(--text-main);
+    padding: 0.25rem 0.9rem;
+    font-size: 0.78rem;
+    height: 32px;
+    cursor: pointer;
+}
+
 .header-divider {
     width: 1px;
     height: 26px;
