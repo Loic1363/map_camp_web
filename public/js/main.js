@@ -8,6 +8,7 @@ if (!token) {
 }
 
 const LANGUAGE_STORAGE_KEY = 'appLanguage';
+const SIDEBAR_STATE_KEY = 'sidebarState';
 const TRANSLATIONS = {
     fr: {
         addMarkerLabel: 'Ajouter un repère',
@@ -83,6 +84,11 @@ let sidebar = document.getElementById('sidebar');
 let markerList = document.getElementById('markerList');
 let exportMenu = document.getElementById('exportMenu');
 let importFileInput = document.getElementById('importFile');
+let appShell = document.querySelector('.app-shell');
+const storedSidebarState = localStorage.getItem(SIDEBAR_STATE_KEY);
+let isSidebarVisible = storedSidebarState
+    ? storedSidebarState !== 'hidden'
+    : window.innerWidth > 900;
 
 let selectedMarkersToLink = [];
 
@@ -99,6 +105,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     attachUIEvents();
     initializeLanguage();
+    initializeSidebarState();
+    window.addEventListener('resize', applySidebarState);
     loadMarkers();
 });
 
@@ -177,8 +185,25 @@ function updateModeButtons() {
 }
 
 // ================== MODES ET UI ==================
+function initializeSidebarState() {
+    applySidebarState();
+}
+
+function applySidebarState() {
+    if (!appShell || !sidebar) return;
+    appShell.classList.toggle('sidebar-hidden', !isSidebarVisible);
+    appShell.classList.toggle('sidebar-visible', isSidebarVisible);
+    if (window.innerWidth <= 900) {
+        sidebar.setAttribute('aria-hidden', (!isSidebarVisible).toString());
+    } else {
+        sidebar.removeAttribute('aria-hidden');
+    }
+}
+
 function toggleSidebar() {
-    sidebar.style.display = sidebar.style.display === 'block' ? 'none' : 'block';
+    isSidebarVisible = !isSidebarVisible;
+    localStorage.setItem(SIDEBAR_STATE_KEY, isSidebarVisible ? 'visible' : 'hidden');
+    applySidebarState();
 }
 
 function toggleAddMarker() {
