@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Carte interactive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Ton CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <!-- Bouton déconnexion -->
+    <button
+        id="btnLogout"
+        style="position:absolute;top:20px;left:20px;z-index:2000;"
+    >
+        Déconnexion
+    </button>
+
+    <!-- Overlay des modes -->
+    <div class="overlay">
+        <h3>Carte interactive avec modes</h3>
+        <div class="button-container">
+            <button id="btnAddMarker">Ajouter un repère: OFF</button>
+            <button id="btnLinkMarkers">Relier des repères: OFF</button>
+        </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="search-box">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Rechercher un lieu..."
+        />
+        <button id="btnSearch">Aller</button>
+    </div>
+
+    <!-- Boutons en haut à droite -->
+    <div class="top-buttons">
+        <div class="icon-btn" id="btnToggleSidebar">☰</div>
+        <div class="icon-btn" id="btnExportMenu">
+            ⬇️
+            <div class="export-menu" id="exportMenu">
+                <button id="btnExportMarkers">Exporter les repères</button>
+                <button id="btnImportMarkers">Importer des repères</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar avec la liste des repères -->
+    <div class="sidebar" id="sidebar">
+        <h4>Liste des repères</h4>
+        <ul id="markerList"></ul>
+    </div>
+
+    <!-- Import JSON -->
+    <input type="file" id="importFile" accept=".json" />
+
+    <!-- Conteneur de la carte -->
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+    <!-- Ton JS -->
+    <script src="js/main.js"></script>
+</body>
+</html>

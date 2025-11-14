@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Connexion - Carte interactive</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <h2>Carte interactive</h2>
+        <p>Connecte-toi ou crée un compte</p>
+
+        <div class="tabs">
+            <button id="tabLogin" class="active">Connexion</button>
+            <button id="tabRegister">Inscription</button>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <input type="email" id="loginEmail" placeholder="Email" required />
+            <input type="password" id="loginPassword" placeholder="Mot de passe" required />
+            <button type="submit">Se connecter</button>
+            <p class="error" id="loginError"></p>
+        </form>
+
+        <form id="registerForm" class="login-form hidden">
+            <input type="email" id="registerEmail" placeholder="Email" required />
+            <input type="password" id="registerPassword" placeholder="Mot de passe" required />
+            <button type="submit">Créer un compte</button>
+            <p class="error" id="registerError"></p>
+        </form>
+    </div>
+
+    <script src="js/login.js"></script>
+</body>
+</html>
