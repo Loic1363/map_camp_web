@@ -2,7 +2,7 @@
 const STORAGE_TOKEN_KEY = 'authToken';
 let token = localStorage.getItem(STORAGE_TOKEN_KEY);
 
-// Si pas connect├® ÔåÆ retour ├á la page de login
+// Si pas connecté → retour à la page de login
 if (!token) {
     window.location.href = '/login.html';
 }
@@ -28,7 +28,7 @@ let selectedMarkersToLink = [];
 
 // ================== INITIALISATION ==================
 window.addEventListener('DOMContentLoaded', () => {
-    // bouton d├®connexion
+    // bouton déconnexion
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
@@ -205,7 +205,7 @@ window.saveMarker = async function (id) {
         updateMarkerList();
     } catch (e) {
         console.error(e);
-        alert('Erreur de mise ├á jour');
+        alert('Erreur de mise á jour');
     }
 };
 
@@ -234,14 +234,14 @@ function updateMarkerList() {
     });
 }
 
-// ================== LIENS ENTRE REPERES ==================
+// ================== LIENS ENTRE REPÈRES ==================
 function selectMarkerForLink(marker) {
     if (selectedMarkersToLink.includes(marker)) {
         selectedMarkersToLink = selectedMarkersToLink.filter(m => m !== marker);
         marker.setIcon(new L.Icon.Default());
     } else {
         if (selectedMarkersToLink.length >= 2) {
-            alert("Vous ne pouvez relier que 2 repères á la fois. Sélectionnez un repères.");
+            alert("Vous ne pouvez relier que 2 repères á la fois. Désélectionnez un repère.");
             return;
         }
         selectedMarkersToLink.push(marker);
