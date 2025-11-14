@@ -1,4 +1,4 @@
-## MapCamp – Account-Based Marker Workspace
+## MapCamp | Account-Based Marker Workspace
 
 MapCamp is a focused field-operations tool that combines a modern authentication flow with a Leaflet-powered workspace. Each user works in a private SQLite-backed map where they can add, label, and review geo‑referenced markers, export the data, and pick up the session on any device. Everything is implemented with a lightweight Node.js/Express stack so it can run in a single process without extra infrastructure.
 
