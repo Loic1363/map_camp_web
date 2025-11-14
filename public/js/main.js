@@ -79,11 +79,53 @@ let sidebar = document.getElementById('sidebar');
 let markerList = document.getElementById('markerList');
 let exportMenu = document.getElementById('exportMenu');
 let importFileInput = document.getElementById('importFile');
+let searchInputEl = document.getElementById('searchInput');
+let searchSuggestionsEl = document.getElementById('searchSuggestions');
+let searchBarEl = document.querySelector('.search-bar');
 let appShell = document.querySelector('.app-shell');
 const storedSidebarState = localStorage.getItem(SIDEBAR_STATE_KEY);
 let isSidebarVisible = storedSidebarState
     ? storedSidebarState !== 'hidden'
     : window.innerWidth > 900;
+const SEARCH_DEBOUNCE_MS = 350;
+const DEFAULT_SEARCH_ZOOM = 15;
+let searchDebounceTimeout = null;
+let currentSearchSuggestions = [];
+let activeSuggestionIndex = -1;
+
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractMarkerNumber(name) {
+    if (!name) return null;
+    const trimmed = name.trim();
+    for (const lang of Object.values(TRANSLATIONS)) {
+        const prefix = escapeRegex(lang.defaultMarkerName);
+        const regex = new RegExp(`^${prefix}\\s+(\\d+)$`, 'i');
+        const match = trimmed.match(regex);
+        if (match) {
+            return Number(match[1]);
+        }
+    }
+    return null;
+}
+
+function getNextDefaultMarkerName() {
+    const languageData = TRANSLATIONS[currentLanguage] || TRANSLATIONS.fr;
+    const usedNumbers = new Set();
+    markers.forEach((marker) => {
+        const number = extractMarkerNumber(marker?.data?.name);
+        if (number !== null) {
+            usedNumbers.add(number);
+        }
+    });
+    let nextNumber = 1;
+    while (usedNumbers.has(nextNumber)) {
+        nextNumber++;
+    }
+    return `${languageData.defaultMarkerName} ${nextNumber}`;
+}
 
 // ================== INITIALISATION ==================
 window.addEventListener('DOMContentLoaded', () => {
@@ -121,6 +163,14 @@ function attachUIEvents() {
 
     const searchBtn = document.getElementById('btnSearch');
     if (searchBtn) searchBtn.addEventListener('click', searchLocation);
+
+    if (searchInputEl) {
+        searchInputEl.addEventListener('input', handleSearchInputChange);
+        searchInputEl.addEventListener('keydown', handleSearchInputKeydown);
+        searchInputEl.addEventListener('focus', handleSearchInputFocus);
+    }
+
+    document.addEventListener('click', handleDocumentClick);
 
     importFileInput.addEventListener('change', importMarkersFile);
 
@@ -283,8 +333,8 @@ async function createMarkerOnServer(data) {
 }
 
 function createMarkerLocal(data) {
-    const languageData = TRANSLATIONS[currentLanguage] || TRANSLATIONS.fr;
-    const name = data.name || (`${languageData.defaultMarkerName} ${data.id}`);
+    const providedName = data.name ? data.name.trim() : '';
+    const name = providedName || getNextDefaultMarkerName();
 
     const marker = L.marker([data.lat, data.lng], { draggable: false }).addTo(map);
 
@@ -404,17 +454,201 @@ async function importMarkersFile(e) {
 }
 
 // ================== RECHERCHE D'ADRESSE ==================
+function handleSearchInputChange(event) {
+    const value = event.target.value.trim();
+    if (searchDebounceTimeout) {
+        clearTimeout(searchDebounceTimeout);
+    }
+    if (!value) {
+        clearSearchSuggestions();
+        return;
+    }
+    searchDebounceTimeout = setTimeout(() => {
+        fetchSearchSuggestions(value);
+    }, SEARCH_DEBOUNCE_MS);
+}
+
+function handleSearchInputFocus() {
+    if (currentSearchSuggestions.length && searchSuggestionsEl) {
+        searchSuggestionsEl.classList.add('visible');
+    }
+}
+
+function handleSearchInputKeydown(event) {
+    if (event.key === 'Enter' && !currentSearchSuggestions.length) {
+        searchLocation();
+        return;
+    }
+
+    if (!currentSearchSuggestions.length) return;
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            moveActiveSuggestion(1);
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            moveActiveSuggestion(-1);
+            break;
+        case 'Enter':
+            event.preventDefault();
+            if (activeSuggestionIndex >= 0) {
+                selectSuggestion(activeSuggestionIndex);
+            }
+            break;
+        case 'Escape':
+            clearSearchSuggestions();
+            break;
+        default:
+            break;
+    }
+}
+
+function handleDocumentClick(event) {
+    if (searchBarEl && !searchBarEl.contains(event.target)) {
+        clearSearchSuggestions();
+    }
+}
+
+async function fetchSearchSuggestions(query) {
+    try {
+        const results = await fetchLocations(query, 5);
+        currentSearchSuggestions = results.map((item) =>
+            buildSuggestionFromResult(item, query)
+        );
+        activeSuggestionIndex = -1;
+        renderSearchSuggestions();
+    } catch (e) {
+        console.error('Search suggestions error', e);
+    }
+}
+
+function renderSearchSuggestions() {
+    if (!searchSuggestionsEl) return;
+    searchSuggestionsEl.innerHTML = '';
+    if (!currentSearchSuggestions.length) {
+        searchSuggestionsEl.classList.remove('visible');
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    currentSearchSuggestions.forEach((suggestion, index) => {
+        const item = document.createElement('div');
+        item.className = 'search-suggestion' + (index === activeSuggestionIndex ? ' active' : '');
+
+        const title = document.createElement('span');
+        title.className = 'suggestion-title';
+        title.textContent = suggestion.title || suggestion.label;
+        item.appendChild(title);
+
+        if (suggestion.subtitle) {
+            const subtitle = document.createElement('span');
+            subtitle.className = 'suggestion-subtitle';
+            subtitle.textContent = suggestion.subtitle;
+            item.appendChild(subtitle);
+        }
+
+        item.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            selectSuggestion(index);
+        });
+
+        fragment.appendChild(item);
+    });
+
+    searchSuggestionsEl.appendChild(fragment);
+    searchSuggestionsEl.classList.add('visible');
+}
+
+function moveActiveSuggestion(step) {
+    if (!currentSearchSuggestions.length) return;
+    activeSuggestionIndex += step;
+    if (activeSuggestionIndex < 0) {
+        activeSuggestionIndex = currentSearchSuggestions.length - 1;
+    } else if (activeSuggestionIndex >= currentSearchSuggestions.length) {
+        activeSuggestionIndex = 0;
+    }
+    updateSuggestionHighlight();
+}
+
+function updateSuggestionHighlight() {
+    if (!searchSuggestionsEl) return;
+    const nodes = searchSuggestionsEl.querySelectorAll('.search-suggestion');
+    nodes.forEach((node, idx) => {
+        node.classList.toggle('active', idx === activeSuggestionIndex);
+    });
+}
+
+function selectSuggestion(index) {
+    const suggestion = currentSearchSuggestions[index];
+    if (!suggestion) return;
+    if (searchInputEl) {
+        searchInputEl.value = suggestion.label;
+    }
+    clearSearchSuggestions();
+    moveMapTo(suggestion.lat, suggestion.lon);
+}
+
+function clearSearchSuggestions() {
+    if (searchSuggestionsEl) {
+        searchSuggestionsEl.innerHTML = '';
+        searchSuggestionsEl.classList.remove('visible');
+    }
+    currentSearchSuggestions = [];
+    activeSuggestionIndex = -1;
+}
+
+function buildSuggestionFromResult(result, fallback = '') {
+    const display = (result.display_name || result.name || fallback || '').trim();
+    const parts = display.split(',');
+    const title = (result.name || parts[0] || fallback || '').trim();
+    const subtitle = parts.slice(1).join(',').trim();
+
+    return {
+        label: display || fallback,
+        title: title || display || fallback,
+        subtitle,
+        lat: Number(result.lat),
+        lon: Number(result.lon)
+    };
+}
+
+async function fetchLocations(query, limit = 5) {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=${limit}&q=${encodeURIComponent(query)}`;
+    const response = await fetch(url, {
+        headers: {
+            'Accept-Language': currentLanguage
+        }
+    });
+    if (!response.ok) {
+        throw new Error('Nominatim error');
+    }
+    return response.json();
+}
+
+function moveMapTo(lat, lon, zoom = DEFAULT_SEARCH_ZOOM) {
+    map.setView([lat, lon], zoom);
+}
+
 async function searchLocation() {
-    const query = document.getElementById('searchInput').value.trim();
+    const query = (searchInputEl?.value || '').trim();
     if (!query) return;
 
-    const resp = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=fr`
-    );
-    const data = await resp.json();
-    if (data.length > 0) {
-        map.setView([data[0].lat, data[0].lon], 13);
-    } else {
-        alert("Lieu introuvable");
+    try {
+        const results = await fetchLocations(query, 1);
+        if (!results.length) {
+            alert("Lieu introuvable");
+            return;
+        }
+        const suggestion = buildSuggestionFromResult(results[0], query);
+        moveMapTo(suggestion.lat, suggestion.lon);
+        if (searchInputEl && suggestion.label) {
+            searchInputEl.value = suggestion.label;
+        }
+        clearSearchSuggestions();
+    } catch (e) {
+        console.error(e);
+        alert("Impossible de trouver ce lieu pour l'instant.");
     }
 }
