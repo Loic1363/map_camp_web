@@ -19,6 +19,9 @@
         <!-- HEADER / TOP BAR -->
         <header class="app-header">
             <div class="header-left">
+                <button id="btnToggleSidebar" class="icon-button" title="Toggle marker panel">
+                    ���~���
+                </button>
                 <div class="brand-logo small">
                     <img src="assets/logo-mapcamp.png" alt="Logo MapCamp" />
                 </div>
@@ -27,13 +30,12 @@
                     <span class="product-subtitle">Operations map workspace</span>
                 </div>
             </div>
-
             <div class="header-center">
                 <div class="search-bar">
                     <input
                         type="text"
                         id="searchInput"
-                        placeholder="Search a city, address or point of interest…"
+                        placeholder="Search a city, address or point of interest�?�"
                     />
                     <button id="btnSearch" class="btn btn-ghost">Go</button>
                 </div>
@@ -43,26 +45,7 @@
                 <button id="btnAddMarker" class="btn btn-primary">
                     Add marker: OFF
                 </button>
-                <button id="btnLinkMarkers" class="btn btn-secondary">
-                    Link markers: OFF
-                </button>
-
                 <div class="header-divider"></div>
-
-                <button id="btnToggleSidebar" class="icon-button" title="Toggle marker panel">
-                    ☰
-                </button>
-
-                <div class="menu-wrapper">
-                    <button id="btnExportMenu" class="icon-button" title="Export / Import">
-                        ⬇️
-                    </button>
-                    <div class="export-menu" id="exportMenu">
-                        <button id="btnExportMarkers">Export markers (JSON)</button>
-                        <button id="btnImportMarkers">Import markers</button>
-                    </div>
-                </div>
-
                 <button id="btnLogout" class="btn btn-ghost">
                     Logout
                 </button>

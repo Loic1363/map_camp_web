@@ -12,7 +12,6 @@ const SIDEBAR_STATE_KEY = 'sidebarState';
 const TRANSLATIONS = {
     fr: {
         addMarkerLabel: 'Ajouter un repère',
-        linkMarkersLabel: 'Relier des repères',
         statusOn: 'ACTIF',
         statusOff: 'INACTIF',
         searchPlaceholder: 'Rechercher une ville, une adresse ou un lieu...',
@@ -29,7 +28,6 @@ const TRANSLATIONS = {
     },
     en: {
         addMarkerLabel: 'Add marker',
-        linkMarkersLabel: 'Link markers',
         statusOn: 'ON',
         statusOff: 'OFF',
         searchPlaceholder: 'Search a city, address or point of interest...',
@@ -46,7 +44,6 @@ const TRANSLATIONS = {
     },
     nl: {
         addMarkerLabel: 'Marker toevoegen',
-        linkMarkersLabel: 'Markers verbinden',
         statusOn: 'AAN',
         statusOff: 'UIT',
         searchPlaceholder: 'Zoek een stad, adres of interessant punt...',
@@ -75,10 +72,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 let markers = new Map(); // id -> marker
-let lines = [];
 
 let addMarkerMode = false;
-let linkMarkersMode = false;
 
 let sidebar = document.getElementById('sidebar');
 let markerList = document.getElementById('markerList');
@@ -89,8 +84,6 @@ const storedSidebarState = localStorage.getItem(SIDEBAR_STATE_KEY);
 let isSidebarVisible = storedSidebarState
     ? storedSidebarState !== 'hidden'
     : window.innerWidth > 900;
-
-let selectedMarkersToLink = [];
 
 // ================== INITIALISATION ==================
 window.addEventListener('DOMContentLoaded', () => {
@@ -111,13 +104,24 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function attachUIEvents() {
-    document.getElementById('btnAddMarker').addEventListener('click', toggleAddMarker);
-    document.getElementById('btnLinkMarkers').addEventListener('click', toggleLinkMarkers);
-    document.getElementById('btnToggleSidebar').addEventListener('click', toggleSidebar);
-    document.getElementById('btnExportMenu').addEventListener('click', toggleExportMenu);
-    document.getElementById('btnExportMarkers').addEventListener('click', exportMarkers);
-    document.getElementById('btnImportMarkers').addEventListener('click', () => importFileInput.click());
-    document.getElementById('btnSearch').addEventListener('click', searchLocation);
+    const addMarkerBtn = document.getElementById('btnAddMarker');
+    if (addMarkerBtn) addMarkerBtn.addEventListener('click', toggleAddMarker);
+
+    const toggleSidebarBtn = document.getElementById('btnToggleSidebar');
+    if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', toggleSidebar);
+
+    const exportMenuBtn = document.getElementById('btnExportMenu');
+    if (exportMenuBtn && exportMenu) exportMenuBtn.addEventListener('click', toggleExportMenu);
+
+    const exportMarkersBtn = document.getElementById('btnExportMarkers');
+    if (exportMarkersBtn) exportMarkersBtn.addEventListener('click', exportMarkers);
+
+    const importMarkersBtn = document.getElementById('btnImportMarkers');
+    if (importMarkersBtn) importMarkersBtn.addEventListener('click', () => importFileInput.click());
+
+    const searchBtn = document.getElementById('btnSearch');
+    if (searchBtn) searchBtn.addEventListener('click', searchLocation);
+
     importFileInput.addEventListener('change', importMarkersFile);
 
     map.on('click', onMapClick);
@@ -178,10 +182,6 @@ function updateModeButtons() {
     if (addBtn) {
         addBtn.textContent = `${t.addMarkerLabel}: ${addMarkerMode ? t.statusOn : t.statusOff}`;
     }
-    const linkBtn = document.getElementById('btnLinkMarkers');
-    if (linkBtn) {
-        linkBtn.textContent = `${t.linkMarkersLabel}: ${linkMarkersMode ? t.statusOn : t.statusOff}`;
-    }
 }
 
 // ================== MODES ET UI ==================
@@ -211,12 +211,8 @@ function toggleAddMarker() {
     updateModeButtons();
 }
 
-function toggleLinkMarkers() {
-    linkMarkersMode = !linkMarkersMode;
-    updateModeButtons();
-}
-
 function toggleExportMenu() {
+    if (!exportMenu) return;
     exportMenu.style.display =
         exportMenu.style.display === 'flex' ? 'none' : 'flex';
 }
@@ -310,14 +306,8 @@ function createMarkerLocal(data) {
 
     marker.bindPopup(createPopupForm(marker.data));
 
-    marker.on('click', function (event) {
-        if (linkMarkersMode) {
-            selectMarkerForLink(this);
-            event.originalEvent.preventDefault();
-            event.originalEvent.stopPropagation();
-        } else {
-            this.openPopup();
-        }
+    marker.on('click', function () {
+        this.openPopup();
     });
 
     updateMarkerList();
@@ -380,33 +370,6 @@ function updateMarkerList() {
     });
 }
 
-// ================== LIENS ENTRE REPÈRES ==================
-function selectMarkerForLink(marker) {
-    if (selectedMarkersToLink.includes(marker)) {
-        selectedMarkersToLink = selectedMarkersToLink.filter(m => m !== marker);
-        marker.setIcon(new L.Icon.Default());
-    } else {
-        if (selectedMarkersToLink.length >= 2) {
-            alert("Vous ne pouvez relier que 2 repères á la fois. Désélectionnez un repère.");
-            return;
-        }
-        selectedMarkersToLink.push(marker);
-        marker.setIcon(new L.Icon({
-            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-red.png'
-        }));
-    }
-
-    if (selectedMarkersToLink.length === 2) {
-        const latlngs = [
-            selectedMarkersToLink[0].getLatLng(),
-            selectedMarkersToLink[1].getLatLng()
-        ];
-        const polyline = L.polyline(latlngs, { color: 'red' }).addTo(map);
-        lines.push(polyline);
-        selectedMarkersToLink.forEach(m => m.setIcon(new L.Icon.Default()));
-        selectedMarkersToLink = [];
-    }
-}
 
 // ================== EXPORT / IMPORT (fichier JSON local) ==================
 function exportMarkers() {

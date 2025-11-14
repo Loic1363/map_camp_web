@@ -408,6 +408,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex: 1;
 }
 
 .brand-logo.small {
@@ -434,9 +435,10 @@ button {
 }
 
 .header-center {
-    flex: 1;
+    flex: 0 1 520px;
     display: flex;
     justify-content: center;
+    margin: 0 auto;
 }
 
 .search-bar {
@@ -469,6 +471,8 @@ button {
     display: flex;
     align-items: center;
     gap: 0.55rem;
+    justify-content: flex-end;
+    flex: 1;
 }
 
 .language-select {
@@ -707,6 +711,11 @@ button {
         order: 3;
         width: 100%;
         justify-content: flex-start;
+    }
+
+    .header-left,
+    .header-right {
+        flex: 1 1 100%;
     }
 
     .search-bar {
