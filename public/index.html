@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <title>Carte interactive</title>
+    <title>MapCamp – Marker Workspace</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Leaflet CSS -->
@@ -11,67 +11,98 @@
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
 
-    <!-- Ton CSS -->
+    <!-- App CSS -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-    <!-- Bouton déconnexion -->
-    <button
-        id="btnLogout"
-        style="position:absolute;top:20px;left:20px;z-index:2000;"
-    >
-        Déconnexion
-    </button>
-
-    <!-- Overlay des modes -->
-    <div class="overlay">
-        <h3>Carte interactive avec modes</h3>
-        <div class="button-container">
-            <button id="btnAddMarker">Ajouter un repère: OFF</button>
-            <button id="btnLinkMarkers">Relier des repères: OFF</button>
-        </div>
-    </div>
-
-    <!-- Barre de recherche -->
-    <div class="search-box">
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Rechercher un lieu..."
-        />
-        <button id="btnSearch">Aller</button>
-    </div>
-
-    <!-- Boutons en haut à droite -->
-    <div class="top-buttons">
-        <div class="icon-btn" id="btnToggleSidebar">☰</div>
-        <div class="icon-btn" id="btnExportMenu">
-            ⬇️
-            <div class="export-menu" id="exportMenu">
-                <button id="btnExportMarkers">Exporter les repères</button>
-                <button id="btnImportMarkers">Importer des repères</button>
+<body class="map-page">
+    <div class="app-shell">
+        <!-- HEADER / TOP BAR -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-logo small">MC</div>
+                <div class="brand-title">
+                    <span class="product-name">MapCamp</span>
+                    <span class="product-subtitle">Operations map workspace</span>
+                </div>
             </div>
+
+            <div class="header-center">
+                <div class="search-bar">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search a city, address or point of interest…"
+                    />
+                    <button id="btnSearch" class="btn btn-ghost">Go</button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button id="btnAddMarker" class="btn btn-primary">
+                    Add marker: OFF
+                </button>
+                <button id="btnLinkMarkers" class="btn btn-secondary">
+                    Link markers: OFF
+                </button>
+
+                <div class="header-divider"></div>
+
+                <button id="btnToggleSidebar" class="icon-button" title="Toggle marker panel">
+                    ☰
+                </button>
+
+                <div class="menu-wrapper">
+                    <button id="btnExportMenu" class="icon-button" title="Export / Import">
+                        ⬇️
+                    </button>
+                    <div class="export-menu" id="exportMenu">
+                        <button id="btnExportMarkers">Export markers (JSON)</button>
+                        <button id="btnImportMarkers">Import markers</button>
+                    </div>
+                </div>
+
+                <button id="btnLogout" class="btn btn-ghost">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN AREA -->
+        <div class="app-main">
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Markers</h2>
+                    <p class="sidebar-subtitle">
+                        Click a marker name to focus it on the map.
+                    </p>
+                </div>
+                <div class="sidebar-body">
+                    <ul id="markerList" class="marker-list"></ul>
+                </div>
+                <div class="sidebar-footer">
+                    <p class="sidebar-tip">
+                        Tip: drag markers directly on the map to update their position.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- MAP -->
+            <main class="map-wrapper">
+                <div id="map"></div>
+            </main>
         </div>
     </div>
 
-    <!-- Sidebar avec la liste des repères -->
-    <div class="sidebar" id="sidebar">
-        <h4>Liste des repères</h4>
-        <ul id="markerList"></ul>
-    </div>
-
-    <!-- Import JSON -->
-    <input type="file" id="importFile" accept=".json" />
-
-    <!-- Conteneur de la carte -->
-    <div id="map"></div>
+    <!-- Hidden file input for JSON import -->
+    <input type="file" id="importFile" accept=".json" hidden />
 
     <!-- Leaflet JS -->
     <script
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     ></script>
 
-    <!-- Ton JS -->
+    <!-- App JS -->
     <script src="js/main.js"></script>
 </body>
 </html>
