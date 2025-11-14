@@ -167,7 +167,6 @@ button {
     letter-spacing: 0.06em;
     font-size: 1rem;
     color: white;
-    box-shadow: 0 18px 40px rgba(79, 140, 255, 0.7);
 }
 
 .brand-logo img {
@@ -417,7 +416,6 @@ button {
     height: 32px;
     border-radius: 12px;
     font-size: 0.9rem;
-    box-shadow: 0 10px 22px rgba(79, 140, 255, 0.6);
 }
 
 .brand-title {
