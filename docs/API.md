@@ -33,7 +33,7 @@ Authentication uses **JSON Web Tokens (JWT)**.
 {
 "token": "<jwt-token-here>"
 }
-
+```
 
 ### Authorization header (required for protected routes)
 
@@ -52,7 +52,7 @@ All API errors follow this structure:
 {
 "error": "Human readable error message"
 }
-
+```
 ---
 
 # Auth Endpoints
@@ -69,7 +69,7 @@ Create a new user account.
 {
 "email": "user@example.com
 }
-
+```
 
 ### Responses
 
@@ -79,7 +79,7 @@ Create a new user account.
 {
 "success": true
 }
-
+```
 
 **400 Bad Request**
 
@@ -87,7 +87,7 @@ Create a new user account.
 {
 "error": "Email already used"
 }
-
+```
 
 **500 Internal Server Error**
 
@@ -95,7 +95,7 @@ Create a new user account.
 {
 "error": "Server error"
 }
-
+```
 
 ---
 
@@ -110,7 +110,7 @@ Authenticate a user and return a JWT token.
 "email": "user@example.com",
 "password": "my-strong-password"
 }
-
+```
 
 ### Responses
 
@@ -120,7 +120,7 @@ Authenticate a user and return a JWT token.
 {
 "token": "<jwt-token-here>"
 }
-
+```
 
 **400 Bad Request**
 
@@ -128,7 +128,7 @@ Authenticate a user and return a JWT token.
 {
 "error": "Invalid credentials"
 }
-
+```
 
 **500 Internal Server Error**
 
@@ -136,7 +136,7 @@ Authenticate a user and return a JWT token.
 {
 "error": "Server error"
 }
-
+```
 
 ---
 
@@ -165,7 +165,7 @@ Return all markers belonging to the authenticated user.
 "date": "2025-11-15"
 }
 ]
-
+```
 
 ---
 
@@ -182,7 +182,7 @@ Create a new marker.
 "name": "Eiffel Tower",
 "date": "2025-11-15"
 }
-
+```
 
 ### Response
 
@@ -195,7 +195,7 @@ Create a new marker.
 "name": "Eiffel Tower",
 "date": "2025-11-15"
 }
-
+```
 
 ---
 
@@ -212,7 +212,7 @@ Update an existing marker.
 "name": "Updated name",
 "date": "2025-11-16"
 }
-
+```
 
 ### Responses
 
@@ -222,7 +222,7 @@ Update an existing marker.
 {
 "success": true
 }
-
+```
 
 **404 Not Found**
 
@@ -230,7 +230,7 @@ Update an existing marker.
 {
 "error": "Marker not found"
 }
-
+```
 
 ---
 
@@ -246,7 +246,7 @@ Delete a marker belonging to the authenticated user.
 {
 "success": true
 }
-
+```
 
 **404 Not Found**
 
@@ -254,7 +254,7 @@ Delete a marker belonging to the authenticated user.
 {
 "error": "Marker not found"
 }
-
+```
 
 ---
 
