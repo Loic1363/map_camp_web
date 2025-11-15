@@ -76,7 +76,6 @@ Create a new user account.
 ```bash 
 200 OK
 ```
----
 
 ```json
 {
@@ -87,7 +86,6 @@ Create a new user account.
 ```bash 
 400 Bad Request
 ```
----
 
 ```json
 {
@@ -95,7 +93,9 @@ Create a new user account.
 }
 ```
 
-#### 500 Internal Server Error
+```bash 
+500 Internal Server Error
+```
 
 ```json
 {
@@ -109,7 +109,9 @@ Create a new user account.
 
 Authenticate a user and return a JWT token.
 
-### Request Body
+```bash 
+Request Body
+```
 
 ```json
 {
@@ -120,7 +122,9 @@ Authenticate a user and return a JWT token.
 
 ### Responses
 
-#### 200 OK
+```bash 
+200 OK
+```
 
 ```json
 {
@@ -128,7 +132,9 @@ Authenticate a user and return a JWT token.
 }
 ```
 
-**400 Bad Request**
+```bash 
+400 bad request
+```
 
 ```json
 {
@@ -136,7 +142,9 @@ Authenticate a user and return a JWT token.
 }
 ```
 
-**500 Internal Server Error**
+```bash 
+500 Internal Server Error
+```
 
 ```json
 {
@@ -222,15 +230,17 @@ Update an existing marker.
 
 ### Responses
 
-**200 OK**
-
+```bash 
+200 OK```
 ```json
 {
 "success": true
 }
 ```
 
-**404 Not Found**
+```bash 
+404 not found
+```
 
 ```json
 {
@@ -246,7 +256,9 @@ Delete a marker belonging to the authenticated user.
 
 ### Responses
 
-**200 OK**
+```bash 
+200 OK
+```
 
 ```json
 {
@@ -254,7 +266,9 @@ Delete a marker belonging to the authenticated user.
 }
 ```
 
-**404 Not Found**
+```bash 
+404 not found
+```
 
 ```json
 {
