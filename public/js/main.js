@@ -770,11 +770,25 @@ function applyMarkerThemeToMarker(marker) {
         marker.closePopup();
         marker.closeTooltip();
         marker.options.interactive = false;
+        marker.dragging && marker.dragging.disable();
+        marker.hideTooltip = true;
+        marker.unbindTooltip();
         return;
     }
 
     marker.setOpacity(1);
     marker.options.interactive = true;
+    marker.dragging && marker.dragging.enable && marker.dragging.enable();
     const icon = MARKER_ICON_SPECS[currentMarkerTheme] || MARKER_ICON_SPECS.default;
     marker.setIcon(icon);
+    if (marker.hideTooltip) {
+        marker.hideTooltip = false;
+        marker.bindTooltip(marker.data.name, {
+            permanent: true,
+            direction: 'top',
+            className: 'my-labels'
+        });
+    } else {
+        marker.setTooltipContent(marker.data.name);
+    }
 }
