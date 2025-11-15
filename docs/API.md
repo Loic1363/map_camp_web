@@ -1,4 +1,4 @@
-## MapCamp API Reference
+## MapCamp | API Reference
 
 This document describes the HTTP interface exposed by the MapCamp Node.js/Express backend. The server issues JWTs for authentication and persists data in `db.sqlite`. Every endpoint returns JSON; errors follow a consistent `{ "error": "message" }` envelope.
 
