@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const path = require('path');
 const os = require('os'); 
+const IS_CI = process.env.CI === 'true';
 
 const SECRET = 'change-moi-par-un-secret-plus-long';
 
@@ -178,15 +179,19 @@ function getLocalIp() {
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 
-app.listen(PORT, HOST, () => {
-    console.log('Serveur démarré en local sur: http://localhost:' + PORT);
+if (!IS_CI) {
+    app.listen(PORT, HOST, () => {
+        console.log('Serveur démarré en local sur: http://localhost:' + PORT);
 
-    const ip = getLocalIp();
-    if (ip) {
-        console.log('Accessible depuis un autre appareil sur le même réseau:');
-        console.log(`  -> http://${ip}:${PORT}/index.html`);
-        console.log(`  -> https://${ip}/index.html`);
-    } else {
-        console.log("Impossible de détecter l'adresse IP locale. Vérifie 'ip a' sur Debian.");
-    }
-});
+        const ip = getLocalIp();
+        if (ip) {
+            console.log('Accessible depuis un autre appareil sur le même réseau:');
+            console.log(`  -> http://${ip}:${PORT}/index.html`);
+            console.log(`  -> https://${ip}/index.html`);
+        } else {
+            console.log("Impossible de détecter l'adresse IP locale. Vérifie 'ip a' sur Debian.");
+        }
+    });
+}
+
+module.exports = app;
