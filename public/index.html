@@ -43,6 +43,33 @@
             </div>
 
             <div class="header-right">
+                <div class="options-wrapper">
+                    <button id="btnOptions" class="icon-button" title="Map options">
+                        ⚙
+                    </button>
+                    <div class="options-menu" id="optionsMenu">
+                        <div class="options-group has-children" data-submenu="markerOptionsMenu">
+                            <button type="button" class="options-item options-item--parent">
+                                Markers
+                                <span class="submenu-caret">›</span>
+                            </button>
+                            <div class="options-submenu" id="markerOptionsMenu">
+                                <div class="options-group has-children" data-submenu="markerColorMenu">
+                                    <button type="button" class="options-item options-item--parent">
+                                        Color
+                                        <span class="submenu-caret">›</span>
+                                    </button>
+                                    <div class="options-submenu" id="markerColorMenu">
+                                        <button type="button" class="options-subitem" data-marker-theme="default">Default marker</button>
+                                        <button type="button" class="options-subitem" data-marker-theme="red">Red marker</button>
+                                        <button type="button" class="options-subitem" data-marker-theme="green">Green marker</button>
+                                        <button type="button" class="options-subitem" data-marker-theme="hidden">Hide markers</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <button id="btnAddMarker" class="btn btn-primary">
                     Add marker: OFF
                 </button>
@@ -55,17 +82,6 @@
                     <option value="en">ENG</option>
                     <option value="nl">NL</option>
                 </select>
-                <div class="options-wrapper">
-                    <button id="btnOptions" class="icon-button" title="Map options">
-                        ⚙
-                    </button>
-                    <div class="options-menu" id="optionsMenu">
-                        <button type="button" class="options-item" data-marker-theme="default">Default marker</button>
-                        <button type="button" class="options-item" data-marker-theme="red">Red marker</button>
-                        <button type="button" class="options-item" data-marker-theme="green">Green marker</button>
-                        <button type="button" class="options-item" data-marker-theme="hidden">Hide markers</button>
-                    </div>
-                </div>
             </div>
         </header>
 

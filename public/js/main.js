@@ -125,6 +125,7 @@ let searchDebounceTimeout = null;
 let currentSearchSuggestions = [];
 let activeSuggestionIndex = -1;
 let optionsHideTimeout = null;
+let optionSubmenuControllers = [];
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -690,6 +691,7 @@ function initializeOptionsMenu() {
         if (optionsHideTimeout) clearTimeout(optionsHideTimeout);
         optionsHideTimeout = setTimeout(() => {
             optionsWrapperEl.classList.remove('open');
+            closeAllSubmenus();
         }, 1000);
     };
 
@@ -705,11 +707,40 @@ function initializeOptionsMenu() {
             event.preventDefault();
             if (optionsWrapperEl.classList.contains('open')) {
                 optionsWrapperEl.classList.remove('open');
+                closeAllSubmenus();
             } else {
                 openMenu();
             }
         });
     }
+
+    optionSubmenuControllers = Array.from(document.querySelectorAll('[data-submenu]'));
+    optionSubmenuControllers.forEach((controller) => attachSubmenuHover(controller));
+}
+
+function attachSubmenuHover(controller) {
+    const submenuId = controller.getAttribute('data-submenu');
+    const submenu = document.getElementById(submenuId);
+    if (!submenu) return;
+
+    let hideTimer = null;
+    const open = () => {
+        if (hideTimer) clearTimeout(hideTimer);
+        controller.classList.add('open');
+    };
+    const schedule = () => {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => controller.classList.remove('open'), 800);
+    };
+
+    controller.addEventListener('mouseenter', open);
+    controller.addEventListener('mouseleave', schedule);
+    submenu.addEventListener('mouseenter', open);
+    submenu.addEventListener('mouseleave', schedule);
+}
+
+function closeAllSubmenus() {
+    optionSubmenuControllers.forEach((controller) => controller.classList.remove('open'));
 }
 
 function setMarkerTheme(theme, persist = true) {

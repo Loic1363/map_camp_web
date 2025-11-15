@@ -592,6 +592,33 @@ button {
 .options-wrapper.open .options-menu {
     display: flex;
 }
+.options-group {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.options-group.has-children > .options-submenu {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 0.4rem);
+    min-width: 180px;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    background: rgba(8, 10, 24, 0.95);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.35rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.45);
+    z-index: 4200;
+}
+
+.options-group.has-children.open > .options-submenu {
+    display: flex;
+}
+
 .options-item {
     border: none;
     border-radius: 8px;
@@ -602,10 +629,33 @@ button {
     text-align: left;
     cursor: pointer;
     transition: background var(--transition-fast), color var(--transition-fast);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.options-item--parent .submenu-caret {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-left: 0.3rem;
+}
+
+.options-subitem {
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .options-item.active,
-.options-item:hover {
+.options-item:hover,
+.options-subitem.active,
+.options-subitem:hover {
     background: rgba(79, 140, 255, 0.2);
     color: white;
 }
