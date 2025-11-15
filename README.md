@@ -1,41 +1,46 @@
-## MapCamp | Account-Based Marker Workspace
+## MapCamp – Account-Based Marker Workspace
 
-MapCamp is a focused field-operations tool that combines a modern authentication flow with a Leaflet-powered workspace. Each user works in a private SQLite-backed map where they can add, label, and review geo‑referenced markers, export the data, and pick up the session on any device. Everything is implemented with a lightweight Node.js/Express stack so it can run in a single process without extra infrastructure.
+MapCamp is a lightweight field-operations application built with Node.js/Express and SQLite. It delivers:
 
----
-
-### Core Capabilities
-
-- **Secure workspace per user**
-  - Email/password registration and login
-  - Password hashing with `bcrypt` and stateless JWT sessions
-  - Markers stored per user in SQLite (`db.sqlite`)
-
-- **Interactive map tooling**
-  - Leaflet 1.9 map with OpenStreetMap tiles
-  - Marker creation directly from map clicks
-  - Inline editing popup with name + date metadata
-  - Sidebar overview to jump to specific markers
-  - Search bar with Nominatim-powered suggestions (cities, addresses, POIs)
-
-- **Productivity enhancements**
-  - JSON export/import to move datasets between accounts or environments
-  - Responsive dark UI usable on laptops and tablets
-  - Persistent layout state (sidebar visibility, language, etc.)
+1. A secure login/register screen with show/hide password controls.
+2. A Leaflet 1.9 workspace where authenticated users create, edit, and manage markers that persist per account.
+3. A centralized `API` helper (`public/js/api.js`) that wraps every HTTP call, attaches JWT headers, and exposes convenience methods such as `API.login`, `API.getMarkers`, etc. This keeps `main.js` and `login.js` declarative and lets you shift API paths in a single place.
 
 ---
 
-### Project Layout
+### Highlights
+
+- **Authentication & session storage**
+  - Email/password registration
+  - Password hashing via `bcrypt`
+  - JWT sessions (7-day expiry) handled by the API helper (`API.setToken`, `API.clearToken`)
+- **Map tooling**
+  - Leaflet map with OpenStreetMap tiles
+  - Marker creation by map clicks, inline editing popup (name + date)
+  - Sidebar list that now zooms in farther when you select a marker
+  - Search bar with debounced, keyboard-navigable Nominatim suggestions that overlay above the map
+  - Language selector (FR / EN / NL) updating UI copy and default marker names
+- **Data portability**
+  - JSON export/import actions
+  - SQLite persistence per user account
+
+---
+
+### Repository Layout
 
 ```
-├── public/                # Static assets served by Express
-│   ├── index.html         # Authenticated workspace UI
-│   ├── login.html         # Authentication screen
-│   ├── css/style.css      # Shared styling
-│   └── js/                # Front-end logic (main.js, login.js)
-├── server.js              # Express API + SQLite access layer
-├── db.sqlite              # SQLite database file (created automatically)
-├── package.json           # Node.js dependencies + scripts
+├── public/
+│   ├── index.html           # Authenticated workspace UI
+│   ├── login.html           # Auth UI (password toggle markup)
+│   ├── css/style.css        # Shared styling (map, login, search suggestions)
+│   └── js/
+│       ├── api.js           # Central fetch wrapper (token store, helper methods)
+│       ├── login.js         # Login/register logic using API.login / API.register
+│       └── main.js          # Map + sidebar + search logic, translations, state
+├── server.js                # Express + SQLite routes (/api/register, /api/markers, …)
+├── db.sqlite                # SQLite database (auto-created)
+├── docs/API.md              # Detailed HTTP API reference
+├── package.json / lock
 └── README.md
 ```
 
@@ -43,71 +48,87 @@ MapCamp is a focused field-operations tool that combines a modern authentication
 
 ### Prerequisites
 
-- Node.js 18+ (Express 5 requires a recent runtime)
-- npm (ships with Node.js)
-- SQLite (bundled via `sqlite3` npm package; no external service needed)
+- Node.js 18 or newer (Express 5 requires a modern runtime)
+- npm (bundled with Node)
+- No external DB is needed; SQLite ships via the `sqlite3` package
 
 ---
 
-### Installation & Local Run
+### Setup & Run
 
 ```bash
-# 1. Install dependencies
+# Install dependencies
 npm install
 
-# 2. (Optional) edit the JWT secret in server.js
-#    const SECRET = 'change-moi-par-un-secret-plus-long';
+# Configure the JWT secret (edit server.js -> const SECRET = '...'
+# or load it via an environment variable before start).
 
-# 3. Start the API + static server
+# Start API + static frontend
 npm start
 
-# 4. Visit the app
-open http://localhost:3000/login
+# Visit the login screen
+# (Windows) start http://localhost:3000/login
+# (macOS/Linux) open http://localhost:3000/login
 ```
 
-The server seeds no default users; register via the login page to create your first account.
+Register a user via `/login` to seed the database. All subsequent actions use your JWT, stored by `API.setToken`.
 
 ---
 
 ### Typical Workflow
 
-1. **Register / sign in** from `/login`.
-2. **Add markers** by toggling “Add marker” and clicking the map, then fill in label/date via the popup form.
-3. **Search for locations** using the top search bar; select a suggestion to recenter the map.
-4. **Review markers** from the sidebar list or via the permanent tooltips on the map.
-5. **Export / import** your dataset using the JSON actions in the toolbar.
-
-All mutations go through the API, so refreshing the page or switching devices keeps your workspace intact.
-
----
-
-### Environment & Configuration Notes
-
-- **JWT secret** – replace the placeholder `SECRET` constant in `server.js` before deploying.
-- **Database file** – `db.sqlite` is committed for convenience; delete it to reset, or point the `sqlite3.Database` constructor to another path.
-- **Ports** – the server listens on `3000` by default (`const PORT = 3000;`).
-- **Static hosting** – Express serves everything from `public/`; no build step is required.
+1. **Register / log in** – the token is persisted by the API helper.
+2. **Add markers** – toggle “Add marker”, click the map, edit name/date in the popup form.
+3. **Search** – type an address or POI; choose from the suggestion overlay to recenter.
+4. **Review** – use the sidebar list or map tooltips; clicking a list item zooms tighter.
+5. **Export / import** – move datasets via the toolbar buttons.
+6. **Logout** – the token is cleared and you return to `/login`.
 
 ---
 
-### Available npm Scripts
+### Configuration Notes
 
-| Command      | Description                           |
-|--------------|---------------------------------------|
-| `npm start`  | Runs `node server.js` (API + frontend)|
-| `npm test`   | Placeholder (no automated tests yet)  |
+- **JWT secret** – replace the placeholder `SECRET` in `server.js`. For production, use an env variable (e.g., `process.env.JWT_SECRET`).
+- **Port** – default is `3000` (`const PORT = 3000`). Change it or set `process.env.PORT`.
+- **Database file** – `db.sqlite` sits at the repo root. Remove it to reset data or point `sqlite3.Database` to another location.
+- **Reverse proxy** – ensure the `Authorization` header is forwarded if running behind Nginx/Apache.
+- **Security** – add HTTPS termination, rate limiting, and CSRF protections before public deployment.
 
 ---
 
-### Extending the Project
+### npm Scripts
 
-- Add rate limiting, HTTPS, and production-ready JWT storage before exposing publicly.
-- Replace the hardcoded secret with an environment variable (e.g., `process.env.JWT_SECRET`).
-- Layer on additional map tooling (clustering, marker categories, etc.) by editing `public/js/main.js`.
-- Swap SQLite for PostgreSQL or another RDBMS if you need concurrent writers or cloud hosting.
+| Command     | Description                               |
+|-------------|-------------------------------------------|
+| `npm start` | Runs `node server.js` (API + static files) |
+| `npm test`  | Placeholder (no automated tests yet)      |
+
+---
+
+### API Overview
+
+All endpoints live under `/api` and return JSON (see `docs/API.md` for full details):
+
+- `POST /api/register` – `{ email, password }` → `{ "success": true }`
+- `POST /api/login` – `{ email, password }` → `{ "token": "<jwt>" }`
+- `GET /api/markers` – list markers for the authenticated user
+- `POST /api/markers` – add marker `{ lat, lng, name, date }`
+- `PUT /api/markers/:id` – update marker
+- `DELETE /api/markers/:id` – remove marker
+
+Missing/invalid tokens return `401/403`. Errors follow `{ "error": "message" }`.
+
+---
+
+### Extending MapCamp
+
+- Swap SQLite for PostgreSQL/MySQL for multi-writer deployments.
+- Add marker categories, clustering, or attachments by extending `main.js`.
+- Integrate `dotenv` and load secrets via environment variables.
+- Add automated tests that import `public/js/api.js` to validate auth/marker flows.
 
 ---
 
 ### License
 
-This project is published under the ISC License. See the `LICENSE` field in `package.json` for details.
+MapCamp is published under the ISC License (see `package.json`).
