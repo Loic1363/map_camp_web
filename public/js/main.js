@@ -21,7 +21,13 @@ const TRANSLATIONS = {
         importMarkersButton: 'Importer des repères',
         logout: 'Se déconnecter',
         defaultMarkerName: 'Repère',
-        exportFileName: 'reperes.json'
+        exportFileName: 'reperes.json',
+        optionsMarkers: 'Marqueurs',
+        optionsMarkerColor: 'Couleur',
+        optionsMarkerDefault: 'Marqueur par défaut',
+        optionsMarkerRed: 'Marqueur rouge',
+        optionsMarkerGreen: 'Marqueur vert',
+        optionsMarkerHide: 'Masquer les marqueurs'
     },
     en: {
         addMarkerLabel: 'Add marker',
@@ -37,7 +43,13 @@ const TRANSLATIONS = {
         importMarkersButton: 'Import markers',
         logout: 'Logout',
         defaultMarkerName: 'Marker',
-        exportFileName: 'markers.json'
+        exportFileName: 'markers.json',
+        optionsMarkers: 'Markers',
+        optionsMarkerColor: 'Color',
+        optionsMarkerDefault: 'Default marker',
+        optionsMarkerRed: 'Red marker',
+        optionsMarkerGreen: 'Green marker',
+        optionsMarkerHide: 'Hide markers'
     },
     nl: {
         addMarkerLabel: 'Marker toevoegen',
@@ -53,7 +65,13 @@ const TRANSLATIONS = {
         importMarkersButton: 'Markers importeren',
         logout: 'Afmelden',
         defaultMarkerName: 'Marker',
-        exportFileName: 'markeringen.json'
+        exportFileName: 'markeringen.json',
+        optionsMarkers: 'Markers',
+        optionsMarkerColor: 'Kleur',
+        optionsMarkerDefault: 'Standaard marker',
+        optionsMarkerRed: 'Rode marker',
+        optionsMarkerGreen: 'Groene marker',
+        optionsMarkerHide: 'Markers verbergen'
     }
 };
 
@@ -259,6 +277,11 @@ function applyTranslations() {
 
     const logoutBtn = document.getElementById('btnLogout');
     if (logoutBtn) logoutBtn.textContent = t.logout;
+
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+    });
 
     updateModeButtons();
 }
