@@ -1,286 +1,182 @@
-# MapCamp API Reference
+## MapCamp API Reference
 
-This document describes the HTTP API exposed by the MapCamp backend.
-
-The backend is a Node.js + Express server with a SQLite database.
+This document describes the HTTP interface exposed by the MapCamp Node.js/Express backend. The server issues JWTs for authentication and persists data in `db.sqlite`. Every endpoint returns JSON; errors follow a consistent `{ "error": "message" }` envelope.
 
 ---
 
-## Base URLs
+### Environment
 
-During development you will typically use one of:
+| Scenario            | Base URL example                 |
+|---------------------|----------------------------------|
+| Local development   | `http://localhost:3000`          |
+| LAN deployment      | `http://<host-or-ip>:3000`       |
+| Behind reverse proxy| `https://<public-hostname>/`     |
 
-- **Local development (Windows)**  
-  http://localhost:3000
-
-- **Home network (Debian server)**  
-  http://<DEBIAN_IP>:3000  
-  Example: http://192.168.1.30:3000
-
-- **Behind Nginx (optional HTTPS)**  
-  https://<DEBIAN_HOST_OR_IP>/  
-  Example: https://192.168.1.30/
+All URLs below are relative to the chosen base.
 
 ---
 
-# Authentication
+### Authentication & Headers
 
-Authentication uses **JSON Web Tokens (JWT)**.
-
-## Login response example
-
-```json
-{
-"token": "<jwt-token-here>"
-}
-```
-
-### Authorization header (required for protected routes)
-
-Authorization: **Bearer <jwt-token-here>**
-
-If the token is missing or invalid, the server returns:
-
-- **401 Unauthorized**
-- **403 Forbidden**
-
-### Error Format
-
-All API errors follow this structure:
-
-```json
-{
-"error": "Human readable error message"
-}
-```
----
-
-# Auth Endpoints
+- Register/login endpoints are public.
+- All marker endpoints require an `Authorization` header:  
+  `Authorization: Bearer <jwt>`
+- Tokens currently expire after 7 days (`jsonwebtoken` default in `server.js`).
 
 ---
 
-## POST /api/register
+## Auth API
 
-Create a new user account.
+### `POST /api/register`
 
-### Request Body
+Create a user account.
 
 ```json
+Request:
 {
-"email": "user@example.com"
+  "email": "user@example.com",
+  "password": "my-strong-password"
 }
 ```
 
-### Responses
+**Responses**
 
-```bash 
-200 OK
-```
-
-```json
-{
-"success": true
-}
-```
-
-```bash 
-400 Bad Request
-```
-
-```json
-{
-"error": "Email already used"
-}
-```
-
-```bash 
-500 Internal Server Error
-```
-
-```json
-{
-"error": "Server error"
-}
-```
+| Code | Body                                | Notes                                  |
+|------|-------------------------------------|----------------------------------------|
+| 200  | `{ "success": true }`               | Account created                        |
+| 400  | `{ "error": "Email already used" }` | Email exists / missing fields          |
+| 500  | `{ "error": "Server error" }`       | Unexpected failure                     |
 
 ---
 
-## POST /api/login
+### `POST /api/login`
 
-Authenticate a user and return a JWT token.
-
-```bash 
-Request Body
-```
+Authenticate and obtain a JWT.
 
 ```json
+Request:
 {
-"email": "user@example.com",
-"password": "my-strong-password"
+  "email": "user@example.com",
+  "password": "my-strong-password"
+}
+
+Response:
+{
+  "token": "<jwt>"
 }
 ```
 
-### Responses
+**Failure cases**
 
-```bash 
-200 OK
-```
-
-```json
-{
-"token": "<jwt-token-here>"
-}
-```
-
-```bash 
-400 bad request
-```
-
-```json
-{
-"error": "Invalid credentials"
-}
-```
-
-```bash 
-500 Internal Server Error
-```
-
-```json
-{
-"error": "Server error"
-}
-```
+| Code | Body                               | Notes                        |
+|------|------------------------------------|------------------------------|
+| 400  | `{ "error": "Invalid credentials" }` | Wrong email/password        |
+| 500  | `{ "error": "Server error" }`      | Database / hashing failure  |
 
 ---
 
-# Marker Endpoints
+## Marker API (JWT required)
 
-All marker endpoints require a valid JWT token:
+The following routes require `Authorization: Bearer <jwt>`.
 
-Authorization: **Bearer <jwt-token-here>**
+### `GET /api/markers`
 
----
-
-## GET /api/markers
-
-Return all markers belonging to the authenticated user.
-
-### Response
+List markers owned by the authenticated user.
 
 ```json
 [
-{
-"id": 1,
-"user_id": 1,
-"lat": 48.8584,
-"lng": 2.2945,
-"name": "Eiffel Tower",
-"date": "2025-11-15"
-}
+  {
+    "id": 1,
+    "user_id": 12,
+    "lat": 48.8584,
+    "lng": 2.2945,
+    "name": "Eiffel Tower",
+    "date": "2025-11-15"
+  }
 ]
 ```
 
 ---
 
-## POST /api/markers
+### `POST /api/markers`
 
-Create a new marker.
-
-### Request Body
+Create a marker.
 
 ```json
+Request:
 {
-"lat": 48.8584,
-"lng": 2.2945,
-"name": "Eiffel Tower",
-"date": "2025-11-15"
+  "lat": 48.8584,
+  "lng": 2.2945,
+  "name": "Eiffel Tower",
+  "date": "2025-11-15"
+}
+
+Response:
+{
+  "id": 42,
+  "user_id": 12,
+  "lat": 48.8584,
+  "lng": 2.2945,
+  "name": "Eiffel Tower",
+  "date": "2025-11-15"
 }
 ```
 
-### Response
-
-```json
-{
-"id": 1,
-"user_id": 1,
-"lat": 48.8584,
-"lng": 2.2945,
-"name": "Eiffel Tower",
-"date": "2025-11-15"
-}
-```
+Errors: `400` when `lat`/`lng` missing, `500` for database failures.
 
 ---
 
-## PUT /api/markers/:id
+### `PUT /api/markers/:id`
 
-Update an existing marker.
-
-### Request Body
+Update an existing marker. All fields are required in the payload.
 
 ```json
+Request:
 {
-"lat": 48.8584,
-"lng": 2.2945,
-"name": "Updated name",
-"date": "2025-11-16"
+  "lat": 48.8584,
+  "lng": 2.2945,
+  "name": "Updated name",
+  "date": "2025-11-16"
 }
 ```
 
-### Responses
+**Responses**
 
-```bash 
-200 OK```
-```json
-{
-"success": true
-}
-```
-
-```bash 
-404 not found
-```
-
-```json
-{
-"error": "Marker not found"
-}
-```
+| Code | Body                    | Notes                              |
+|------|-------------------------|------------------------------------|
+| 200  | `{ "success": true }`   | Update succeeded                   |
+| 404  | `{ "error": "Marker not found" }` | ID missing or not owned     |
+| 500  | `{ "error": "Server error" }`     | Database failure              |
 
 ---
 
-## DELETE /api/markers/:id
+### `DELETE /api/markers/:id`
 
-Delete a marker belonging to the authenticated user.
+Remove a marker.
 
-### Responses
-
-```bash 
-200 OK
-```
-
-```json
-{
-"success": true
-}
-```
-
-```bash 
-404 not found
-```
-
-```json
-{
-"error": "Marker not found"
-}
-```
+| Code | Body                               | Notes                           |
+|------|------------------------------------|---------------------------------|
+| 200  | `{ "success": true }`              | Deletion succeeded              |
+| 404  | `{ "error": "Marker not found" }`  | Marker does not exist / not owned |
+| 500  | `{ "error": "Server error" }`      | Database failure                |
 
 ---
 
-# Notes
+## Error Handling Summary
 
-- Users only have access to their own markers.  
-- The SQLite database file **db.sqlite** is created automatically.  
-- JWT tokens expire after **7 days**.  
-- Config values can be overridden via **.env** (see `.env.example`).  
+- `401` – missing token  
+- `403` – invalid/expired token  
+- `400` – validation errors (missing email, etc.)  
+- `404` – marker not found for authenticated user  
+- `500` – SQLite or application error
+
+All responses include a JSON body with either a `token`, `success` flag, or `error` message (plus resource payloads for GET/POST).
+
+---
+
+## Operational Notes
+
+- The `db.sqlite` file is created automatically at startup. Remove it to reset data.
+- Update the `SECRET` constant in `server.js` before deploying.
+- When hosting behind HTTPS, ensure the reverse proxy forwards the `Authorization` header intact.
+- Add rate limiting and HTTPS termination before exposing publicly.
