@@ -22,58 +22,41 @@ tabRegister.addEventListener('click', () => {
 attachPasswordToggle('loginPassword', 'toggleLoginPassword');
 attachPasswordToggle('registerPassword', 'toggleRegisterPassword');
 
-loginForm.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     loginError.textContent = '';
-    try {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
 
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    API.login(email, password)
+        .then((data) => {
+            API.setToken(data.token);
+            window.location.href = '/index.html';
+        })
+        .catch((err) => {
+            loginError.textContent = err.message || 'Erreur de connexion';
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-            loginError.textContent = data.error || 'Erreur de connexion';
-            return;
-        }
-
-        // Sauver le token et aller vers la carte
-        localStorage.setItem('authToken', data.token);
-        window.location.href = '/index.html';
-    } catch (err) {
-        loginError.textContent = 'Erreur réseau';
-    }
 });
 
-registerForm.addEventListener('submit', async (e) => {
+registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
     registerError.textContent = '';
-    try {
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
 
-        const res = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+
+    API.register(email, password)
+        .then(() => {
+            alert('Account created! You can now login.');
+            tabLogin.click();
+        })
+        .catch((err) => {
+            registerError.textContent = err.message || 'Erreur inscription';
         });
-
-        const data = await res.json();
-        if (!res.ok) {
-            registerError.textContent = data.error || 'Erreur inscription';
-            return;
-        }
-
-        // Après inscription, bascule sur onglet login
-        tabLogin.click();
-    } catch (err) {
-        registerError.textContent = 'Erreur réseau';
-    }
 });
+
+
 
 function attachPasswordToggle(inputId, buttonId) {
     const input = document.getElementById(inputId);

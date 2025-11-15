@@ -1,9 +1,5 @@
 ﻿// ================== AUTH / REDIRECTION ==================
-const STORAGE_TOKEN_KEY = 'authToken';
-let token = localStorage.getItem(STORAGE_TOKEN_KEY);
-
-// Si pas connecté → retour à la page de login
-if (!token) {
+if (!API.token) {
     window.location.href = '/login.html';
 }
 
@@ -63,6 +59,15 @@ const TRANSLATIONS = {
 let currentLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'fr';
 if (!TRANSLATIONS[currentLanguage]) {
     currentLanguage = 'fr';
+}
+
+function handleAuthError(error) {
+    if (error && (error.status === 401 || error.status === 403)) {
+        API.clearToken();
+        window.location.href = '/login.html';
+        return true;
+    }
+    return false;
 }
 
 // ================== VARIABLES GLOBALES ==================
@@ -133,7 +138,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
-            localStorage.removeItem(STORAGE_TOKEN_KEY);
+            API.clearToken();
             window.location.href = '/login.html';
         });
     }
@@ -279,59 +284,30 @@ function onMapClick(e) {
     });
 }
 
-// ================== HELPERS API ==================
-async function apiGet(path) {
-    const res = await fetch(path, {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem(STORAGE_TOKEN_KEY);
-        window.location.href = '/login.html';
-        return;
-    }
-    return res.json();
-}
-
-async function apiSend(path, method, body) {
-    const res = await fetch(path, {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify(body)
-    });
-    if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem(STORAGE_TOKEN_KEY);
-        window.location.href = '/login.html';
-        return;
-    }
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Erreur API');
-    return data;
-}
-
 // ================== CHARGEMENT / CREATION (DB) ==================
 async function loadMarkers() {
     try {
-        const data = await apiGet('/api/markers');
-        if (!data) return;
+        const data = await API.getMarkers();
         data.forEach(m => createMarkerLocal(m));
     } catch (e) {
+        if (handleAuthError(e)) return;
         console.error(e);
-        alert('Erreur de chargement des repères');
+        alert('Erreur de chargement des rep�res');
     }
 }
 
+
 async function createMarkerOnServer(data) {
     try {
-        const created = await apiSend('/api/markers', 'POST', data);
+        const created = await API.createMarker(data);
         createMarkerLocal(created);
     } catch (e) {
+        if (handleAuthError(e)) return;
         console.error(e);
-        alert('Erreur lors de la création du repère');
+        alert('Erreur lors de la cr�ation du rep�re');
     }
 }
+
 
 function createMarkerLocal(data) {
     const providedName = data.name ? data.name.trim() : '';
@@ -387,10 +363,11 @@ window.saveMarker = async function (id) {
     marker.data.date = document.getElementById(`date_${id}`).value;
 
     try {
-        await apiSend('/api/markers/' + id, 'PUT', marker.data);
+        await API.updateMarker(id, marker.data);
         marker.setTooltipContent(marker.data.name);
         updateMarkerList();
     } catch (e) {
+        if (handleAuthError(e)) return;
         console.error(e);
         alert('Erreur de mise á jour');
     }
@@ -401,11 +378,12 @@ window.removeMarker = async function (id) {
     if (!marker) return;
 
     try {
-        await apiSend('/api/markers/' + id, 'DELETE');
+        await API.deleteMarker(id);
         map.removeLayer(marker);
         markers.delete(id);
         updateMarkerList();
     } catch (e) {
+        if (handleAuthError(e)) return;
         console.error(e);
         alert('Erreur de suppression');
     }
