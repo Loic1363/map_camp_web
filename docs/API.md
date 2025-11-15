@@ -73,7 +73,7 @@ Create a new user account.
 
 ### Responses
 
-**200 OK**
+#### 200 OK
 
 ```json
 {
