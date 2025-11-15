@@ -67,7 +67,7 @@ Create a new user account.
 
 ```json
 {
-"email": "user@example.com
+"email": "user@example.com"
 }
 ```
 
