@@ -29,6 +29,7 @@ Authentication uses **JSON Web Tokens (JWT)**.
 
 ## Login response example
 
+```json
 {
 "token": "<jwt-token-here>"
 }
@@ -47,10 +48,10 @@ If the token is missing or invalid, the server returns:
 
 All API errors follow this structure:
 
+```json
 {
 "error": "Human readable error message"
 }
-
 
 ---
 
@@ -64,6 +65,7 @@ Create a new user account.
 
 ### Request Body
 
+```json
 {
 "email": "user@example.com
 }
@@ -73,6 +75,7 @@ Create a new user account.
 
 **200 OK**
 
+```json
 {
 "success": true
 }
@@ -80,6 +83,7 @@ Create a new user account.
 
 **400 Bad Request**
 
+```json
 {
 "error": "Email already used"
 }
@@ -87,6 +91,7 @@ Create a new user account.
 
 **500 Internal Server Error**
 
+```json
 {
 "error": "Server error"
 }
@@ -100,6 +105,7 @@ Authenticate a user and return a JWT token.
 
 ### Request Body
 
+```json
 {
 "email": "user@example.com",
 "password": "my-strong-password"
@@ -110,6 +116,7 @@ Authenticate a user and return a JWT token.
 
 **200 OK**
 
+```json
 {
 "token": "<jwt-token-here>"
 }
@@ -117,6 +124,7 @@ Authenticate a user and return a JWT token.
 
 **400 Bad Request**
 
+```json
 {
 "error": "Invalid credentials"
 }
@@ -124,6 +132,7 @@ Authenticate a user and return a JWT token.
 
 **500 Internal Server Error**
 
+```json
 {
 "error": "Server error"
 }
@@ -145,6 +154,7 @@ Return all markers belonging to the authenticated user.
 
 ### Response
 
+```json
 [
 {
 "id": 1,
@@ -165,6 +175,7 @@ Create a new marker.
 
 ### Request Body
 
+```json
 {
 "lat": 48.8584,
 "lng": 2.2945,
@@ -175,6 +186,7 @@ Create a new marker.
 
 ### Response
 
+```json
 {
 "id": 1,
 "user_id": 1,
@@ -193,6 +205,7 @@ Update an existing marker.
 
 ### Request Body
 
+```json
 {
 "lat": 48.8584,
 "lng": 2.2945,
@@ -205,6 +218,7 @@ Update an existing marker.
 
 **200 OK**
 
+```json
 {
 "success": true
 }
@@ -212,6 +226,7 @@ Update an existing marker.
 
 **404 Not Found**
 
+```json
 {
 "error": "Marker not found"
 }
@@ -227,6 +242,7 @@ Delete a marker belonging to the authenticated user.
 
 **200 OK**
 
+```json
 {
 "success": true
 }
@@ -234,6 +250,7 @@ Delete a marker belonging to the authenticated user.
 
 **404 Not Found**
 
+```json
 {
 "error": "Marker not found"
 }
