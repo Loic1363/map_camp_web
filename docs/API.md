@@ -73,7 +73,9 @@ Create a new user account.
 
 ### Responses
 
-#### 200 OK
+```bash 
+200 OK
+```
 
 ```json
 {
@@ -81,7 +83,7 @@ Create a new user account.
 }
 ```
 
-**400 Bad Request**
+#### 400 Bad Request
 
 ```json
 {
@@ -89,7 +91,7 @@ Create a new user account.
 }
 ```
 
-**500 Internal Server Error**
+#### 500 Internal Server Error
 
 ```json
 {
@@ -114,7 +116,7 @@ Authenticate a user and return a JWT token.
 
 ### Responses
 
-**200 OK**
+#### 200 OK
 
 ```json
 {
