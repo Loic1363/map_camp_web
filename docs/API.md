@@ -76,6 +76,7 @@ Create a new user account.
 ```bash 
 200 OK
 ```
+---
 
 ```json
 {
@@ -83,7 +84,10 @@ Create a new user account.
 }
 ```
 
-#### 400 Bad Request
+```bash 
+400 Bad Request
+```
+---
 
 ```json
 {
