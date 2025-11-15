@@ -261,6 +261,7 @@ function toggleAddMarker() {
     updateModeButtons();
 }
 
+// ================== EN COURS DE DEV ==================
 function toggleExportMenu() {
     if (!exportMenu) return;
     exportMenu.style.display =
@@ -415,13 +416,13 @@ function updateMarkerList() {
     markers.forEach((m) => {
         const li = document.createElement('li');
         li.textContent = m.data.name;
-        li.onclick = () => map.setView([m.data.lat, m.data.lng], 16);
+        li.onclick = () => map.setView([m.data.lat, m.data.lng], 18);
         markerList.appendChild(li);
     });
 }
 
 
-// ================== EXPORT / IMPORT (fichier JSON local) ==================
+// ================== EN COURS DE DEV - EXPORT / IMPORT (fichier JSON local) ==================
 function exportMarkers() {
     const data = Array.from(markers.values()).map(m => m.data);
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

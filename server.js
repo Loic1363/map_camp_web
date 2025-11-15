@@ -4,13 +4,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const path = require('path');
+const os = require('os'); 
 
 const SECRET = 'change-moi-par-un-secret-plus-long';
 
 const app = express();
 const db = new sqlite3.Database('./db.sqlite');
 
-// Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -96,7 +96,6 @@ app.post('/api/login', (req, res) => {
 
 // ====== Routes markers (protégées) ======
 
-// Récupérer tous les repères de l'utilisateur
 app.get('/api/markers', authMiddleware, (req, res) => {
     db.all(
         'SELECT * FROM markers WHERE user_id = ?',
@@ -108,7 +107,6 @@ app.get('/api/markers', authMiddleware, (req, res) => {
     );
 });
 
-// Créer un repère
 app.post('/api/markers', authMiddleware, (req, res) => {
     const { lat, lng, name, date } = req.body;
     if (lat == null || lng == null) {
@@ -132,7 +130,6 @@ app.post('/api/markers', authMiddleware, (req, res) => {
     );
 });
 
-// Mettre à jour un repère
 app.put('/api/markers/:id', authMiddleware, (req, res) => {
     const markerId = req.params.id;
     const { lat, lng, name, date } = req.body;
@@ -150,7 +147,6 @@ app.put('/api/markers/:id', authMiddleware, (req, res) => {
     );
 });
 
-// Supprimer un repère
 app.delete('/api/markers/:id', authMiddleware, (req, res) => {
     const markerId = req.params.id;
 
@@ -165,8 +161,31 @@ app.delete('/api/markers/:id', authMiddleware, (req, res) => {
     );
 });
 
+// ====== Utilitaire pour récupérer l'IP locale (pour Debian / réseau) ======
+function getLocalIp() {
+    const nets = os.networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                return net.address;
+            }
+        }
+    }
+    return null;
+}
+
 // ====== Démarrage ======
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log('Serveur démarré sur http://localhost:' + PORT);
+const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+    console.log('Serveur démarré en local sur: http://localhost:' + PORT);
+
+    const ip = getLocalIp();
+    if (ip) {
+        console.log('Accessible depuis un autre appareil sur le même réseau:');
+        console.log(`  -> http://${ip}:${PORT}/index.html`);
+    } else {
+        console.log("Impossible de détecter l'adresse IP locale. Vérifie 'ip a' sur Debian.");
+    }
 });
