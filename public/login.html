@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <title>MapCamp – Secure Sign In</title>
+    <title>MapCamp â€“ Secure Sign In</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -24,15 +24,20 @@
                 <button id="tabRegister" class="auth-tab">Create account</button>
             </div>
 
-            <!-- Login form -->
+                        <!-- Login form -->
             <form id="loginForm" class="auth-form">
                 <div class="field">
                     <label for="loginEmail">Work email</label>
                     <input type="email" id="loginEmail" placeholder="you@company.com" required />
                 </div>
-                <div class="field">
+                <div class="field password-field">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required />
+                    <div class="password-input">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required />
+                        <button type="button" class="password-toggle" id="toggleLoginPassword" aria-label="Toggle password visibility">
+                            Show
+                        </button>
+                    </div>
                 </div>
                 <p class="form-error" id="loginError"></p>
                 <button type="submit" class="btn btn-primary">Sign in</button>
@@ -44,17 +49,21 @@
                     <label for="registerEmail">Work email</label>
                     <input type="email" id="registerEmail" placeholder="you@company.com" required />
                 </div>
-                <div class="field">
+                <div class="field password-field">
                     <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" placeholder="Create a strong password" required />
+                    <div class="password-input">
+                        <input type="password" id="registerPassword" placeholder="Create a strong password" required />
+                        <button type="button" class="password-toggle" id="toggleRegisterPassword" aria-label="Toggle password visibility">
+                            Show
+                        </button>
+                    </div>
                 </div>
                 <p class="form-error" id="registerError"></p>
                 <button type="submit" class="btn btn-primary">Create account</button>
             </form>
-
             <p class="auth-footer-note">
                 Your markers are stored securely per account.  
-                You can safely close your browser – your workspace will be there when you come back.
+                You can safely close your browser â€“ your workspace will be there when you come back.
             </p>
         </div>
     </div>

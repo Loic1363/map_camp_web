@@ -415,7 +415,7 @@ function updateMarkerList() {
     markers.forEach((m) => {
         const li = document.createElement('li');
         li.textContent = m.data.name;
-        li.onclick = () => map.setView([m.data.lat, m.data.lng], 13);
+        li.onclick = () => map.setView([m.data.lat, m.data.lng], 16);
         markerList.appendChild(li);
     });
 }

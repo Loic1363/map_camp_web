@@ -282,6 +282,36 @@ button {
     box-shadow: 0 0 0 1px rgba(79, 140, 255, 0.4);
 }
 
+.password-field .password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field .password-input input {
+    width: 100%;
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.55rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    border-radius: var(--radius-pill);
+    font-size: 0.74rem;
+    font-weight: 500;
+    padding: 0.2rem 0.8rem;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.password-toggle:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--text-main);
+}
+
 .form-error {
     min-height: 1.1rem;
     font-size: 0.78rem;

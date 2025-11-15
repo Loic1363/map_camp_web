@@ -19,6 +19,9 @@ tabRegister.addEventListener('click', () => {
     loginForm.classList.add('hidden');
 });
 
+attachPasswordToggle('loginPassword', 'toggleLoginPassword');
+attachPasswordToggle('registerPassword', 'toggleRegisterPassword');
+
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     loginError.textContent = '';
@@ -71,3 +74,15 @@ registerForm.addEventListener('submit', async (e) => {
         registerError.textContent = 'Erreur réseau';
     }
 });
+
+function attachPasswordToggle(inputId, buttonId) {
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    if (!input || !button) return;
+
+    button.addEventListener('click', () => {
+        const isHidden = input.getAttribute('type') === 'password';
+        input.setAttribute('type', isHidden ? 'text' : 'password');
+        button.textContent = isHidden ? 'Hide' : 'Show';
+    });
+}
