@@ -2,12 +2,12 @@
   "name": "map_camp_web",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js",
-    "dev": "node src/server.js",
-    "check": "node -e \"require('./src/app')\""
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node -e \"require('./server')\""
   },
   "repository": {
     "type": "git",
