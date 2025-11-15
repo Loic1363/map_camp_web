@@ -185,6 +185,7 @@ app.listen(PORT, HOST, () => {
     if (ip) {
         console.log('Accessible depuis un autre appareil sur le même réseau:');
         console.log(`  -> http://${ip}:${PORT}/index.html`);
+        console.log(`  -> https://${ip}/index.html`);
     } else {
         console.log("Impossible de détecter l'adresse IP locale. Vérifie 'ip a' sur Debian.");
     }
