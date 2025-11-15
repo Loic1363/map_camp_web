@@ -5,6 +5,7 @@ if (!API.token) {
 
 const LANGUAGE_STORAGE_KEY = 'appLanguage';
 const SIDEBAR_STATE_KEY = 'sidebarState';
+const MARKER_THEME_KEY = 'markerTheme';
 const TRANSLATIONS = {
     fr: {
         addMarkerLabel: 'Ajouter un repère',
@@ -61,6 +62,19 @@ if (!TRANSLATIONS[currentLanguage]) {
     currentLanguage = 'fr';
 }
 
+const MARKER_ICON_SHADOW = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
+const COLOR_MARKER_BASE = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/';
+const MARKER_ICON_SPECS = {
+    default: new L.Icon.Default(),
+    red: createColorMarkerIcon('marker-icon-red.png'),
+    green: createColorMarkerIcon('marker-icon-green.png')
+};
+const AVAILABLE_MARKER_THEMES = new Set([...Object.keys(MARKER_ICON_SPECS), 'hidden']);
+let currentMarkerTheme = localStorage.getItem(MARKER_THEME_KEY) || 'default';
+if (!AVAILABLE_MARKER_THEMES.has(currentMarkerTheme)) {
+    currentMarkerTheme = 'default';
+}
+
 function handleAuthError(error) {
     if (error && (error.status === 401 || error.status === 403)) {
         API.clearToken();
@@ -68,6 +82,17 @@ function handleAuthError(error) {
         return true;
     }
     return false;
+}
+
+function createColorMarkerIcon(filename) {
+    return new L.Icon({
+        iconUrl: `${COLOR_MARKER_BASE}${filename}`,
+        shadowUrl: MARKER_ICON_SHADOW,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        tooltipAnchor: [16, -28]
+    });
 }
 
 // ================== VARIABLES GLOBALES ==================
@@ -87,6 +112,8 @@ let importFileInput = document.getElementById('importFile');
 let searchInputEl = document.getElementById('searchInput');
 let searchSuggestionsEl = document.getElementById('searchSuggestions');
 let searchBarEl = document.querySelector('.search-bar');
+let optionsWrapperEl = document.querySelector('.options-wrapper');
+let optionsMenuEl = document.getElementById('optionsMenu');
 let appShell = document.querySelector('.app-shell');
 const storedSidebarState = localStorage.getItem(SIDEBAR_STATE_KEY);
 let isSidebarVisible = storedSidebarState
@@ -97,6 +124,7 @@ const DEFAULT_SEARCH_ZOOM = 15;
 let searchDebounceTimeout = null;
 let currentSearchSuggestions = [];
 let activeSuggestionIndex = -1;
+let optionsHideTimeout = null;
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -146,6 +174,9 @@ window.addEventListener('DOMContentLoaded', () => {
     attachUIEvents();
     initializeLanguage();
     initializeSidebarState();
+    initializeMarkerThemeControls();
+    initializeOptionsMenu();
+    setMarkerTheme(currentMarkerTheme, false);
     window.addEventListener('resize', applySidebarState);
     loadMarkers();
 });
@@ -630,4 +661,89 @@ async function searchLocation() {
         console.error(e);
         alert("Impossible de trouver ce lieu pour l'instant.");
     }
+}
+
+function initializeMarkerThemeControls() {
+    const themeButtons = document.querySelectorAll('[data-marker-theme]');
+    themeButtons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.preventDefault();
+            const theme = btn.getAttribute('data-marker-theme');
+            setMarkerTheme(theme);
+        });
+    });
+    updateMarkerThemeUI();
+}
+
+function initializeOptionsMenu() {
+    if (!optionsWrapperEl || !optionsMenuEl) return;
+    const toggleBtn = document.getElementById('btnOptions');
+
+    const openMenu = () => {
+        if (!optionsWrapperEl) return;
+        if (optionsHideTimeout) clearTimeout(optionsHideTimeout);
+        optionsWrapperEl.classList.add('open');
+    };
+
+    const scheduleClose = () => {
+        if (!optionsWrapperEl) return;
+        if (optionsHideTimeout) clearTimeout(optionsHideTimeout);
+        optionsHideTimeout = setTimeout(() => {
+            optionsWrapperEl.classList.remove('open');
+        }, 1000);
+    };
+
+    optionsWrapperEl.addEventListener('mouseenter', openMenu);
+    optionsWrapperEl.addEventListener('mouseleave', scheduleClose);
+    optionsMenuEl.addEventListener('mouseenter', openMenu);
+    optionsMenuEl.addEventListener('mouseleave', scheduleClose);
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('focus', openMenu);
+        toggleBtn.addEventListener('blur', scheduleClose);
+        toggleBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (optionsWrapperEl.classList.contains('open')) {
+                optionsWrapperEl.classList.remove('open');
+            } else {
+                openMenu();
+            }
+        });
+    }
+}
+
+function setMarkerTheme(theme, persist = true) {
+    if (!AVAILABLE_MARKER_THEMES.has(theme)) {
+        theme = 'default';
+    }
+    currentMarkerTheme = theme;
+    if (persist) {
+        localStorage.setItem(MARKER_THEME_KEY, theme);
+    }
+    markers.forEach((marker) => applyMarkerThemeToMarker(marker));
+    updateMarkerThemeUI();
+}
+
+function updateMarkerThemeUI() {
+    const themeButtons = document.querySelectorAll('[data-marker-theme]');
+    themeButtons.forEach((btn) => {
+        const theme = btn.getAttribute('data-marker-theme');
+        btn.classList.toggle('active', theme === currentMarkerTheme);
+    });
+}
+
+function applyMarkerThemeToMarker(marker) {
+    if (!marker) return;
+    if (currentMarkerTheme === 'hidden') {
+        marker.setOpacity(0);
+        marker.closePopup();
+        marker.closeTooltip();
+        marker.options.interactive = false;
+        return;
+    }
+
+    marker.setOpacity(1);
+    marker.options.interactive = true;
+    const icon = MARKER_ICON_SPECS[currentMarkerTheme] || MARKER_ICON_SPECS.default;
+    marker.setIcon(icon);
 }
